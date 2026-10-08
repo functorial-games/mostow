@@ -1,0 +1,3 @@
+build_id	target	toolchain	ick_revision	ick_status	ick_evidence
+miro-a1	armeabi-v7a	ndk	64fab64ff47acc627ce1154c3118f0232390cad5	gap:Exact Mostow ICK application object generation and platform linking are not qualified	doc:notes/source-boundary.md
+miro-c67	arm64-v8a	ndk	64fab64ff47acc627ce1154c3118f0232390cad5	gap:Exact Mostow ICK application object generation and platform linking are not qualified	doc:notes/source-boundary.md

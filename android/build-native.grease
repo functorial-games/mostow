@@ -1,0 +1,38 @@
+#!/usr/bin/env grease
+# Explicit inputs: ROOT NDK ABI OUTPUT. No device compilation or provisioning.
+var root = $(git -C "$[ARGV[0]]" rev-parse --show-toplevel)
+var ndk = ARGV[1]
+var abi = ARGV[2]
+var output = ARGV[3]
+var target = 'armv7a-linux-androideabi21'
+if test "$abi" = arm64-v8a { setvar target = 'aarch64-linux-android21' }
+if test "$abi" != arm64-v8a {
+  if test "$abi" != armeabi-v7a { printf '\033[31mFAIL\033[0m unsupported ABI\n'; exit 2 }
+}
+var tools = "$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
+var clang = "$tools/$target-clang"
+var glue = "$ndk/sources/android/native_app_glue"
+test -x "$clang"
+test -x "$tools/ld.lld"
+test -f "$glue/android_native_app_glue.c"
+mkdir -p "$root/build/$abi"
+mkdir -p $(dirname "$output")
+python3 "$root/tools/normalize_icky_c.py" "$root/icky/mostow_sheet.c" "$root/build/$abi/mostow_sheet.c"
+"$clang" -std=c11 -O2 -fPIC -Wall -Wextra -Werror -Wpedantic -I "$glue" -I "$root/native" \
+  -I "$root/fixtures" -I "$root/android" -c "$root/build/$abi/mostow_sheet.c" -o "$root/build/$abi/sheet.o"
+"$clang" -std=c11 -O2 -fPIC -Wall -Wextra -Werror -Wpedantic -I "$glue" -I "$root/native" \
+  -I "$root/android" -c "$root/native/mostow_view.c" -o "$root/build/$abi/view.o"
+"$clang" -std=c11 -O2 -fPIC -Wall -Wextra -Werror -Wpedantic -I "$glue" -I "$root/native" \
+  -I "$root/android" -c "$root/android/mostow_renderer.c" -o "$root/build/$abi/renderer.o"
+"$clang" -std=c11 -O2 -fPIC -Wall -Wextra -Werror -Wpedantic -I "$glue" -I "$root/native" \
+  -I "$root/android" -c "$root/android/mostow_android.c" -o "$root/build/$abi/activity.o"
+"$clang" -std=c11 -O2 -fPIC -Wall -Wextra -Wno-format-pedantic -I "$glue" \
+  -c "$glue/android_native_app_glue.c" -o "$root/build/$abi/glue.o"
+"$clang" --ld-path="$tools/ld.lld" -shared "$root/build/$abi/sheet.o" "$root/build/$abi/view.o" "$root/build/$abi/renderer.o" \
+  "$root/build/$abi/activity.o" "$root/build/$abi/glue.o" -Wl,--no-undefined -Wl,-soname,libmostow.so \
+  -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -landroid -llog -lEGL -lGLESv2 -lm -o "$output"
+"$tools/llvm-strip" --strip-unneeded "$output"
+"$tools/llvm-readelf" -Ws "$output" > "$root/build/$abi/symbols.tsv"
+rg 'ANativeActivity_onCreate' "$root/build/$abi/symbols.tsv"
+rg 'android_main' "$root/build/$abi/symbols.tsv"
+printf '\033[32mPASS\033[0m Mostow NDK compatibility build %s\n' "$abi"

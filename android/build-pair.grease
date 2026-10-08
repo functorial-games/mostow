@@ -1,0 +1,19 @@
+#!/usr/bin/env grease
+# ROOT NDK SUBSTRATE SDK BUILD_TOOLS PUBLIC_TEST_KEYSTORE OUTPUT_DIR
+var root = $(git -C "$[ARGV[0]]" rev-parse --show-toplevel)
+var ndk = ARGV[1]
+var substrate = ARGV[2]
+export ANDROID_HOME="$[ARGV[3]]"
+export ANDROID_BUILD_TOOLS="$[ARGV[4]]"
+export ANDROID_KEYSTORE="$[ARGV[5]]"
+export ANDROID_SOURCE_COMMIT=$(git -C "$root" rev-parse HEAD)
+var output = ARGV[6]
+mkdir -p "$output"
+var grease = $MOSTOW_GREASE
+test -x "$grease"
+"$grease" "$root/android/build-native.grease" "$root" "$ndk" armeabi-v7a "$output/armeabi-v7a/libmostow.so"
+"$grease" "$root/android/build-native.grease" "$root" "$ndk" arm64-v8a "$output/arm64-v8a/libmostow.so"
+"$grease" "$root/android/build-apk.grease" "$root" "$substrate" "$output/armeabi-v7a/libmostow.so" armeabi-v7a "$output/mostow-miro-a1-armeabi-v7a.apk"
+"$grease" "$root/android/build-apk.grease" "$root" "$substrate" "$output/arm64-v8a/libmostow.so" arm64-v8a "$output/mostow-miro-c67-arm64-v8a.apk"
+sha256sum "$output/mostow-miro-a1-armeabi-v7a.apk" "$output/mostow-miro-c67-arm64-v8a.apk" > "$output/apk-digests.tsv"
+printf '\033[32mPASS\033[0m paired signed packages; producer/physical acceptance remain separate\n'
