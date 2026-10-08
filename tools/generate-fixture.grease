@@ -1,9 +1,10 @@
 #!/usr/bin/env grease
 var root = $(git -C "$[ARGV[0]]" rev-parse --show-toplevel)
+var compiler = ENV.MOSTOW_HOST_COMPILER
 mkdir -p "$root/build/host"
 python3 "$root/tools/normalize_icky_c.py" "$root/icky/mostow_sheet.c" "$root/build/host/mostow_sheet.c"
 python3 "$root/tools/normalize_icky_c.py" "$root/icky/realize_sheet.c" "$root/build/host/realize_sheet.c"
-cc -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -DMOSTOW_GENERATOR -I "$root/native" \
+$compiler -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -DMOSTOW_GENERATOR -I "$root/native" \
   "$root/build/host/mostow_sheet.c" "$root/build/host/realize_sheet.c" -lm -o "$root/build/host/realize-sheet"
 "$root/build/host/realize-sheet" > "$root/build/host/sheet_base.candidate.inc"
 mv "$root/build/host/sheet_base.candidate.inc" "$root/fixtures/sheet_base.inc"

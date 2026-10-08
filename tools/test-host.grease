@@ -1,8 +1,9 @@
 #!/usr/bin/env grease
 var root = $(git -C "$[ARGV[0]]" rev-parse --show-toplevel)
+var compiler = ENV.MOSTOW_HOST_COMPILER
 mkdir -p "$root/build/host"
 python3 "$root/tools/normalize_icky_c.py" "$root/icky/mostow_sheet.c" "$root/build/host/mostow_sheet.c"
-cc -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -I "$root/native" -I "$root/fixtures" \
+$compiler -std=c11 -O2 -Wall -Wextra -Werror -Wpedantic -I "$root/native" -I "$root/fixtures" \
   "$root/build/host/mostow_sheet.c" "$root/native/mostow_view.c" "$root/native/test_mostow_sheet.c" \
   -lm -o "$root/build/host/test-mostow"
 "$root/build/host/test-mostow"
