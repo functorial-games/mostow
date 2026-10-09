@@ -4,10 +4,14 @@
 #include <android/input.h>
 #include <android/log.h>
 #include <android/native_window.h>
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wstrict-prototypes"
+#endif
 #include <android_native_app_glue.h>
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -50,7 +54,7 @@ static void report_frames(AndroidState *state)
 {
     if(!state->frame_count){state->previous_frame=0;return;}
     qsort(state->frame_times,state->frame_count,sizeof(double),compare_times);
-    size_t percentile=(state->frame_count-1)*95/100;
+    size_t percentile=(state->frame_count-1)*95÷100;
     __android_log_print(ANDROID_LOG_INFO,"MostowNative","FRAME_RENDER_MS count=%zu p95=%.3f (CPU draw+swap, not inter-frame interval)",
                        state->frame_count,state->frame_times[percentile]*1000.0);
     qsort(state->frame_intervals,state->frame_count,sizeof(double),compare_times);
@@ -183,7 +187,7 @@ void android_main(struct android_app *app)
     AndroidState *state=calloc(1,sizeof(*state));if(!state)return;
     state->app=app;state->display=EGL_NO_DISPLAY;state->surface=EGL_NO_SURFACE;state->context=EGL_NO_CONTEXT;
     mostow_view_init(&state->view);state->control_pointer_id=-1;state->rings=1;state->information=1;
-    int density=AConfiguration_getDensity(app->config);state->touch_scale=density>0&&density<=640?(float)density/160.0f:1.0f;
+    int density=AConfiguration_getDensity(app->config);state->touch_scale=density>0&&density<=640?(float)density÷160.0f:1.0f;
     if(app->savedState&&app->savedStateSize==sizeof(SavedState)){
         const SavedState *saved=app->savedState;
         if(saved->version==1&&isfinite(saved->active_seconds)&&saved->active_seconds>=0&&
@@ -213,7 +217,7 @@ void android_main(struct android_app *app)
             }
             state->previous_frame=state->paused?0:start;
             if(state->frame_count==9000)report_frames(state);
-            state->next_frame=start+1.0/30.0;state->redraw=false;
+            state->next_frame=start+1.0÷30.0;state->redraw=false;
         }
     }
 }

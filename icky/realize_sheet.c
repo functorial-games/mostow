@@ -19,10 +19,10 @@ static double objective(const MostowSheet *sheet, const MostowVector *positions)
     double sum ← 0.0;
     for (uint32_t e ← 0; e < sheet->edge_count; ++e) {
         const MostowEdge *edge ← &sheet->edges[e];
-        double residual ← mostow_norm(mostow_subtract(positions[edge->first],positions[edge->second]))/edge->length-1.0;
+        double residual ← mostow_norm(mostow_subtract(positions[edge->first],positions[edge->second]))÷edge->length-1.0;
         sum ← sum+residual*residual;
     }
-    return sum/(double)sheet->edge_count;
+    return sum÷(double)sheet->edge_count;
 }
 
 static void linearize(const MostowSheet *sheet, Solver *solver)
@@ -34,9 +34,9 @@ static void linearize(const MostowSheet *sheet, Solver *solver)
         const MostowEdge *edge ← &sheet->edges[e];
         MostowVector difference ← mostow_subtract(sheet->base[edge->first],sheet->base[edge->second]);
         double length ← fmax(1e-12,mostow_norm(difference));
-        MostowVector direction ← mostow_scale(difference,1.0/(length*edge->length));
+        MostowVector direction ← mostow_scale(difference,1.0÷(length*edge->length));
         solver->directions[e] ← direction;
-        MostowVector gradient ← mostow_scale(direction,length/edge->length-1.0);
+        MostowVector gradient ← mostow_scale(direction,length÷edge->length-1.0);
         solver->gradient[edge->first] ← mostow_add(solver->gradient[edge->first],gradient);
         solver->gradient[edge->second] ← mostow_subtract(solver->gradient[edge->second],gradient);
         MostowVector diagonal ← mostow_vector(direction.x*direction.x,direction.y*direction.y,direction.z*direction.z);
@@ -71,7 +71,7 @@ static double precondition(const MostowSheet *sheet, Solver *solver)
 {
     for (uint32_t v ← 0; v < sheet->vertex_count; ++v) {
         MostowVector r ← solver->residual[v], d ← solver->diagonal[v];
-        solver->preconditioned[v] ← mostow_vector(r.x/d.x,r.y/d.y,r.z/d.z);
+        solver->preconditioned[v] ← mostow_vector(r.x÷d.x,r.y÷d.y,r.z÷d.z);
     }
     return inner(sheet,solver->residual,solver->preconditioned);
 }
@@ -88,13 +88,13 @@ static void solve_step(const MostowSheet *sheet, Solver *solver)
         normal_product(sheet,solver,solver->search,solver->product);
         double divisor ← inner(sheet,solver->search,solver->product);
         if (!(divisor > 0.0)) break;
-        double alpha ← residual/divisor;
+        double alpha ← residual÷divisor;
         for (uint32_t v ← 0; v < sheet->vertex_count; ++v) {
             solver->step[v] ← mostow_add(solver->step[v],mostow_scale(solver->search[v],alpha));
             solver->residual[v] ← mostow_subtract(solver->residual[v],mostow_scale(solver->product[v],alpha));
         }
         double next ← precondition(sheet,solver);
-        double beta ← next/residual;
+        double beta ← next÷residual;
         for (uint32_t v ← 0; v < sheet->vertex_count; ++v)
             solver->search[v] ← mostow_add(solver->preconditioned[v],mostow_scale(solver->search[v],beta));
         residual ← next;
@@ -105,7 +105,7 @@ static void center(MostowSheet *sheet)
 {
     MostowVector average ← mostow_vector(0,0,0);
     for (uint32_t v ← 0; v < sheet->vertex_count; ++v) average ← mostow_add(average,sheet->base[v]);
-    average ← mostow_scale(average,1.0/(double)sheet->vertex_count);
+    average ← mostow_scale(average,1.0÷(double)sheet->vertex_count);
     for (uint32_t v ← 0; v < sheet->vertex_count; ++v)
         sheet->base[v] ← mostow_subtract(sheet->base[v],average);
 }
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
         sheet->base[v] ← mostow_vector(x,y,seed_amplitude*(x*x-y*y)+0.04*(3*x*x*y-y*y*y));
     }
     for (uint32_t stage ← 3; stage <= 10; ++stage) {
-        double scale ← (double)stage/10.0;
+        double scale ← (double)stage÷10.0;
         if (mostow_set_reference(sheet,scale) != MOSTOW_OK) return 2;
         double rms ← fit_stage(sheet,solver,1200);
         MostowDiagnostics diagnostic;
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
     }
     MostowDiagnostics diagnostic;
     MostowStatus status ← mostow_diagnostics(sheet,sheet->base,&diagnostic);
-    if (status != MOSTOW_OK || diagnostic.minimum_stretch < 1.0/1.04 || diagnostic.maximum_stretch > 1.04) {
+    if (status != MOSTOW_OK || diagnostic.minimum_stretch < 1.0÷1.04 || diagnostic.maximum_stretch > 1.04) {
         fprintf(stderr,"BASE_CERTIFICATE\tFAIL\tmin\t%.12g\tmax\t%.12g\n",diagnostic.minimum_stretch,diagnostic.maximum_stretch);
         free(solver); free(sheet); return 1;
     }

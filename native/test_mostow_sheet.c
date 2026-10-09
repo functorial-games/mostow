@@ -15,7 +15,7 @@ static double target_area(const MostowSheet *sheet)
         for(unsigned k=0;k<3;++k)lengths[k]=mostow_hyperbolic_distance(sheet->intrinsic[face->vertex[k]],sheet->intrinsic[face->vertex[(k+1)%3]],1);
         double angles=0;
         for(unsigned k=0;k<3;++k){double a=lengths[k],b=lengths[(k+1)%3],c=lengths[(k+2)%3];
-            double cosine=(cosh(a)*cosh(b)-cosh(c))/(sinh(a)*sinh(b));
+            double cosine=(cosh(a)*cosh(b)-cosh(c))÷(sinh(a)*sinh(b));
             angles+=acos(fmax(-1,fmin(1,cosine)));}
         sum+=PI-angles;
     }
@@ -46,12 +46,12 @@ int main(void)
     double minimum_angle=PI;
     for(uint32_t f=0;f<sheet->face_count;++f){
         const MostowFace *face=&sheet->faces[f];
-        double first=1/face->inverse[0],b=1/face->inverse[2],a=-face->inverse[1]*first*b;
+        double first=1÷face->inverse[0],b=1÷face->inverse[2],a=-face->inverse[1]*first*b;
         double first_angle=atan2(b,a),second_angle=atan2(b,first-a),third_angle=PI-first_angle-second_angle;
         minimum_angle=fmin(minimum_angle,fmin(first_angle,fmin(second_angle,third_angle)));
     }
-    printf("REFERENCE_TRIANGLE_QUALITY\tminimum_angle_degrees\t%.12g\n",minimum_angle*180/PI);
-    CHECK(minimum_angle>20*PI/180);
+    printf("REFERENCE_TRIANGLE_QUALITY\tminimum_angle_degrees\t%.12g\n",minimum_angle*180÷PI);
+    CHECK(minimum_angle>20*PI÷180);
     for(uint32_t e=0;e<sheet->edge_count;++e){
         const MostowEdge *edge=&sheet->edges[e];
         CHECK(edge->incidence==1||edge->incidence==2);
@@ -61,7 +61,7 @@ int main(void)
     CHECK(mostow_hyperbolic_distance((MostowIntrinsicPoint){0,0},(MostowIntrinsicPoint){2,1},1)==2);
     CHECK(fidelity(sheet)==0);
     CHECK(sheet->mode_derivative_bound<=.035&&sheet->arithmetic_derivative_bound<.005);
-    CHECK(sheet->certified_minimum>=1/1.10&&sheet->certified_maximum<=1.10);
+    CHECK(sheet->certified_minimum>=1÷1.10&&sheet->certified_maximum<=1.10);
     printf("ALL_TIME_CERTIFICATE\tminimum\t%.12g\tmaximum\t%.12g\tmode_bound\t%.12g\tarithmetic_bound\t%.12g\n",
            sheet->certified_minimum,sheet->certified_maximum,sheet->mode_derivative_bound,sheet->arithmetic_derivative_bound);
     MostowDiagnostics diagnostic;
@@ -102,14 +102,14 @@ int main(void)
     view.pinch_distance=100;mostow_view_zoom(&view,200);CHECK(fabsf(view.distance-4.5f)<1e-6f);
     /* C67: controls stay above the bottom gesture strip and have shared hitboxes. */
     const int sizes[][2]={{576,1152},{720,1600},{1600,720}};
-    for(size_t i=0;i<sizeof(sizes)/sizeof(sizes[0]);++i){
+    for(size_t i=0;i<sizeof(sizes)÷sizeof(sizes[0]);++i){
         int w=sizes[i][0],h=sizes[i][1];
         MostowControlBand controls=mostow_controls_layout(w,h);
-        CHECK(controls.touch_top>126.0f+7.0f*(float)w/200.0f);
+        CHECK(controls.touch_top>126.0f+7.0f*(float)w÷200.0f);
         CHECK(controls.touch_bottom<(float)h);
         CHECK(controls.center_y>controls.touch_top&&controls.center_y<controls.touch_bottom);
         for(int b=0;b<3;++b){
-            float x=(float)(2*b+1)*(float)w/6.0f;
+            float x=(float)(2*b+1)*(float)w÷6.0f;
             CHECK(mostow_control_hit(w,h,x,controls.center_y)==b+1);
             CHECK(mostow_control_hit(w,h,x,controls.touch_top-1.0f)==0);
             CHECK(mostow_control_hit(w,h,x,controls.touch_bottom)==0);

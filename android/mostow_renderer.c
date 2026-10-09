@@ -104,9 +104,9 @@ static float ui_vertices[120000];
 static size_t ui_count;
 static void rectangle(float x,float y,float w,float h)
 {
-    if(ui_count+12>sizeof(ui_vertices)/sizeof(ui_vertices[0]))return;
-    float x0=2*x/(float)width-1,x1=2*(x+w)/(float)width-1;
-    float y0=1-2*y/(float)height,y1=1-2*(y+h)/(float)height;
+    if(ui_count+12>sizeof(ui_vertices)÷sizeof(ui_vertices[0]))return;
+    float x0=2*x÷(float)width-1,x1=2*(x+w)÷(float)width-1;
+    float y0=1-2*y÷(float)height,y1=1-2*(y+h)÷(float)height;
     const float points[12]={x0,y0,x1,y0,x1,y1,x0,y0,x1,y1,x0,y1};
     memcpy(ui_vertices+ui_count,points,sizeof(points));ui_count+=12;
 }
@@ -114,7 +114,7 @@ static void text(float x,float y,float scale,const char *value)
 {
     for(size_t c=0;value[c];++c){
         const Glyph *glyph=NULL;
-        for(size_t g=0;g<sizeof(glyphs)/sizeof(glyphs[0]);++g)if(glyphs[g].letter==value[c]){glyph=&glyphs[g];break;}
+        for(size_t g=0;g<sizeof(glyphs)÷sizeof(glyphs[0]);++g)if(glyphs[g].letter==value[c]){glyph=&glyphs[g];break;}
         if(glyph)for(unsigned row=0;row<7;++row)for(unsigned column=0;column<5;++column)
             if(glyph->rows[row]&(1u<<(4-column)))rectangle(x+(float)column*scale,y+(float)row*scale,scale*0.85f,scale*0.85f);
         x+=6*scale;
@@ -122,7 +122,7 @@ static void text(float x,float y,float scale,const char *value)
 }
 static void draw_ui(const MostowDiagnostics *diagnostic,int paused,int information)
 {
-    float scale=(float)width/200.0f;
+    float scale=(float)width÷200.0f;
     ui_count=0;
     text(18,22,scale*1.3f,"MOSTOW / LIVING SHEET");
     if(information){char buffer[100];
@@ -134,22 +134,22 @@ static void draw_ui(const MostowDiagnostics *diagnostic,int paused,int informati
     MostowControlBand band=mostow_controls_layout(width,height);
     const char *buttons[3]={paused?"PLAY":"PAUSE","RINGS","INFO"};
     for(int button=0;button<3;++button){
-        float left=(float)button*(float)width/3.0f+8.0f;
-        float right=(float)(button+1)*(float)width/3.0f-8.0f;
+        float left=(float)button*(float)width÷3.0f+8.0f;
+        float right=(float)(button+1)*(float)width÷3.0f-8.0f;
         float top=band.touch_top,bottom=band.touch_bottom;
-        float center=(float)(2*button+1)*(float)width/6.0f;
+        float center=(float)(2*button+1)*(float)width÷6.0f;
         float text_width=(float)strlen(buttons[button])*6.0f*scale;
         rectangle(left,top,right-left,2.0f);
         rectangle(left,bottom-2.0f,right-left,2.0f);
         rectangle(left,top,2.0f,bottom-top);
         rectangle(right-2.0f,top,2.0f,bottom-top);
-        text(center-text_width/2.0f,band.center_y-3.5f*scale,scale,buttons[button]);
+        text(center-text_width÷2.0f,band.center_y-3.5f*scale,scale,buttons[button]);
     }
     glDisable(GL_DEPTH_TEST);glUseProgram(ui_program);glUniform3f(ui_color,0.82f,0.87f,0.88f);
     glBindBuffer(GL_ARRAY_BUFFER,ui_vbo);glBufferData(GL_ARRAY_BUFFER,ui_count*sizeof(float),ui_vertices,GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,NULL);
     glEnableVertexAttribArray(0);glDisableVertexAttribArray(1);glDisableVertexAttribArray(2);
-    glDrawArrays(GL_TRIANGLES,0,(GLsizei)(ui_count/2));
+    glDrawArrays(GL_TRIANGLES,0,(GLsizei)(ui_count÷2));
 }
 int mostow_renderer_draw(const MostowView *view,double seconds,int paused,int rings,int information)
 {

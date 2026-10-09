@@ -8,10 +8,10 @@ and paired MIRO C67. It supports one-finger orbit, two-finger pinch, pause,
 intrinsic ring shading, and explicit current L/K diagnostics. Physical-device
 acceptance remains pending; host rendering is not phone evidence.
 
-The mathematical source is compositional ICKY C through an explicit NDK
-compatibility boundary. See [source boundary](notes/source-boundary.md),
+The mathematical source is compositional ICKY C compiled directly by ICK,
+with NDK assembly and platform linking. See [source boundary](notes/source-boundary.md),
 [motion certificate](notes/motion-certificate.md), and
-[qualification](qualification/m2/README.md).
+[current division qualification](qualification/division-20261009.md).
 
 The Android shell adapts NativeActivity/EGL/GLES2 responsibilities from
 `functorial-games/seifert` at `aea9528072bdf9f18dd4b2934e8708f242c81c8b`.
@@ -33,6 +33,9 @@ Invoke scripts through a verified Grease runtime, with explicit absolute paths.
 `tools/test-host.grease` takes the checkout path. `android/build-pair.grease`
 takes checkout, NDK, canonical android-NDK substrate, SDK, build-tools, public
 test keystore, and output directory; `MOSTOW_GREASE` identifies that runtime.
+`MOSTOW_HOST_COMPILER`, `MOSTOW_ICK_ARMV7`, and `MOSTOW_ICK_ARM64` select the
+qualified native and Android ICK drivers. The maintained producers compile
+original `←` and `÷` source directly.
 It builds both maintained ABIs, verifies the established test certificate via
 the canonical packager, and emits per-APK receipts. It does not install or
 qualify either phone. The producer preflight additionally requires Mostow's
