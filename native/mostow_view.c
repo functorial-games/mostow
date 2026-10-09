@@ -23,6 +23,26 @@ void mostow_view_zoom(MostowView *view, float distance)
         view->distance = fmaxf(4.0f,fminf(20.0f,view->distance*view->pinch_distance/distance));
     view->pinch_distance = distance;
 }
+/* The existing HUD ends at 126 + seven scaled bitmap rows.
+   Keep the buttons below it, away from Android's bottom gesture bar. */
+MostowControlBand mostow_controls_layout(int width, int height)
+{
+    float glyph_scale = (float)width / 200.0f;
+    float hud_bottom = 126.0f + 7.0f * glyph_scale;
+    float center_y = fmaxf(0.23f * (float)height, hud_bottom + 76.0f);
+    float half_height = fmaxf(48.0f, fminf(68.0f, 0.065f * (float)height));
+    if (center_y + half_height > (float)height - 8.0f)
+        center_y = (float)height - 8.0f - half_height;
+    return (MostowControlBand){center_y,center_y-half_height,center_y+half_height};
+}
+int mostow_control_hit(int width, int height, float x, float y)
+{
+    if (width <= 0 || height <= 0 || !isfinite(x) || !isfinite(y) ||
+        x < 0.0f || x >= (float)width) return 0;
+    MostowControlBand band = mostow_controls_layout(width,height);
+    if (y < band.touch_top || y >= band.touch_bottom) return 0;
+    return 1 + (int)(3.0f * x / (float)width);
+}
 void mostow_view_matrix(const MostowView *view,int width,int height,float matrix[16],float rotation[9])
 {
     float cy = cosf(view->yaw), sy = sinf(view->yaw);

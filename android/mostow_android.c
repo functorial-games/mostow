@@ -141,12 +141,12 @@ static int32_t handle_input(struct android_app *app,AInputEvent *event)
         int32_t id=AMotionEvent_getPointerId(event,changed);
         float x=AMotionEvent_getX(event,changed),y=AMotionEvent_getY(event,changed);
         if(state->view.primary_id<0){
-            if(y>(float)state->height-fmaxf(64*state->touch_scale,84)){
+            int button=mostow_control_hit(state->width,state->height,x,y);
+            if(button!=0){
                 state->control_pointer_id=id;
-                int button=(int)(3*x/(float)state->width);
-                if(button==0){state->paused=!state->paused;state->previous_clock=0;}
-                if(button==1)state->rings=!state->rings;
-                if(button==2)state->information=!state->information;
+                if(button==1){state->paused=!state->paused;state->previous_clock=0;}
+                if(button==2)state->rings=!state->rings;
+                if(button==3)state->information=!state->information;
                 state->redraw=true;return 1;
             }
             state->view.primary_id=id;state->view.last_x=x;state->view.last_y=y;

@@ -131,9 +131,20 @@ static void draw_ui(const MostowDiagnostics *diagnostic,int paused,int informati
         text(18,96,scale,buffer);
         text(18,126,scale,"R 2: C 22.79 / EUCLID 12.57");
     }
-    text((float)width/6-15*scale,(float)height-52,scale,paused?"PLAY":"PAUSE");
-    text((float)width/2-15*scale,(float)height-52,scale,"RINGS");
-    text((float)width*5/6-12*scale,(float)height-52,scale,"INFO");
+    MostowControlBand band=mostow_controls_layout(width,height);
+    const char *buttons[3]={paused?"PLAY":"PAUSE","RINGS","INFO"};
+    for(int button=0;button<3;++button){
+        float left=(float)button*(float)width/3.0f+8.0f;
+        float right=(float)(button+1)*(float)width/3.0f-8.0f;
+        float top=band.touch_top,bottom=band.touch_bottom;
+        float center=(float)(2*button+1)*(float)width/6.0f;
+        float text_width=(float)strlen(buttons[button])*6.0f*scale;
+        rectangle(left,top,right-left,2.0f);
+        rectangle(left,bottom-2.0f,right-left,2.0f);
+        rectangle(left,top,2.0f,bottom-top);
+        rectangle(right-2.0f,top,2.0f,bottom-top);
+        text(center-text_width/2.0f,band.center_y-3.5f*scale,scale,buttons[button]);
+    }
     glDisable(GL_DEPTH_TEST);glUseProgram(ui_program);glUniform3f(ui_color,0.82f,0.87f,0.88f);
     glBindBuffer(GL_ARRAY_BUFFER,ui_vbo);glBufferData(GL_ARRAY_BUFFER,ui_count*sizeof(float),ui_vertices,GL_DYNAMIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);glVertexAttribPointer(0,2,GL_FLOAT,GL_FALSE,0,NULL);

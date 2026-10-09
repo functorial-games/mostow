@@ -100,6 +100,26 @@ int main(void)
     MostowView view;mostow_view_init(&view);view.primary_id=42;view.secondary_id=73;
     mostow_view_release(&view);CHECK(view.primary_id==-1&&view.secondary_id==-1);
     view.pinch_distance=100;mostow_view_zoom(&view,200);CHECK(fabsf(view.distance-4.5f)<1e-6f);
+    /* C67: controls stay above the bottom gesture strip and have shared hitboxes. */
+    const int sizes[][2]={{576,1152},{720,1600},{1600,720}};
+    for(size_t i=0;i<sizeof(sizes)/sizeof(sizes[0]);++i){
+        int w=sizes[i][0],h=sizes[i][1];
+        MostowControlBand controls=mostow_controls_layout(w,h);
+        CHECK(controls.touch_top>126.0f+7.0f*(float)w/200.0f);
+        CHECK(controls.touch_bottom<(float)h);
+        CHECK(controls.center_y>controls.touch_top&&controls.center_y<controls.touch_bottom);
+        for(int b=0;b<3;++b){
+            float x=(float)(2*b+1)*(float)w/6.0f;
+            CHECK(mostow_control_hit(w,h,x,controls.center_y)==b+1);
+            CHECK(mostow_control_hit(w,h,x,controls.touch_top-1.0f)==0);
+            CHECK(mostow_control_hit(w,h,x,controls.touch_bottom)==0);
+            CHECK(mostow_control_hit(w,h,x,(float)h-1.0f)==0);
+        }
+        CHECK(mostow_control_hit(w,h,-1.0f,controls.center_y)==0);
+        CHECK(mostow_control_hit(w,h,(float)w,controls.center_y)==0);
+        CHECK(mostow_control_hit(w,h,NAN,controls.center_y)==0);
+        CHECK(mostow_control_hit(w,h,controls.center_y,NAN)==0);
+    }
     float matrix[16],rotation[9];mostow_view_matrix(&view,576,1152,matrix,rotation);
     for(unsigned i=0;i<16;++i)CHECK(isfinite(matrix[i]));
     printf("FLOAT_POSES\tPASS\t1000\tmaximum_L\t%.12g\tmaximum_K\t%.12g\tdisplacement_at_20s\t%.12g\n",
